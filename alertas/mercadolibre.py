@@ -80,6 +80,11 @@ def parsear_listado(html: str) -> list[Aviso]:
     return avisos
 
 
+def url_listado(url: str) -> str:
+    """La vista de mapa (_DisplayType_M) no trae las tarjetas en el HTML: se pasa a vista de lista."""
+    return re.sub(r"_DisplayType_[A-Z]+", "", url)
+
+
 def url_siguiente(html: str) -> str | None:
     soup = BeautifulSoup(html, "html.parser")
     a = soup.select_one(

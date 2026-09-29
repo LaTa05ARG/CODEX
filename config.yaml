@@ -7,6 +7,7 @@
 #        "-orden-publicado-descendente.html") para que lo nuevo quede arriba.
 #      - MercadoLibre: agregá el filtro "Publicados hoy" (`_PublishedToday_YES`
 #        en la URL), porque el sitio no ordena por fecha.
+#      - Si pegás una URL en vista de mapa, se convierte sola a vista de lista.
 #   2. `filtros`: condiciones extra que se revisan sobre cada aviso antes de
 #      mandar el mail. Todos son opcionales; borrá los que no uses.
 #
@@ -19,23 +20,26 @@ opciones:
   notificar_en_primera_corrida: false # la 1ª vez solo registra lo que ya está publicado
 
 busquedas:
-  - nombre: Alquiler 2+ amb Palermo/Belgrano
+  # MercadoLibre: toda CABA con los filtros del sitio (venta, apto crédito, 3+ dormitorios,
+  # 1+ cochera, hasta USD 400.000, publicados hoy). Los barrios se filtran con
+  # `ubicacion_incluye` porque MercadoLibre trata Belgrano R/C, Palermo Soho/Chico,
+  # Barrio Norte, Las Cañitas, etc. como barrios aparte.
+  - nombre: Venta 3 dorm ML
     urls:
-      - https://inmuebles.mercadolibre.com.ar/departamentos/alquiler/capital-federal/palermo/_PublishedToday_YES_NoIndex_True
-      - https://inmuebles.mercadolibre.com.ar/departamentos/alquiler/capital-federal/belgrano/_PublishedToday_YES_NoIndex_True
-      - https://www.zonaprop.com.ar/departamentos-alquiler-palermo-orden-publicado-descendente.html
-      - https://www.zonaprop.com.ar/departamentos-alquiler-belgrano-orden-publicado-descendente.html
+      - https://inmuebles.mercadolibre.com.ar/departamentos/venta/apto-credito/mas-de-3-dormitorios/capital-federal/_PriceRange_0USD-400000USD_PublishedToday_YES_NoIndex_True_PARKING*LOTS_1-*
     filtros:
-      precio_max: {ARS: 900000, USD: 700}  # tope por moneda; avisos en otra moneda se descartan
-      # precio_min: {ARS: 300000}
-      # aceptar_sin_precio: false          # avisos con "Consultar precio"
-      expensas_max: 200000                 # en pesos
-      ambientes_min: 2
-      # ambientes_max: 3
-      # dormitorios_min: 1
-      # banos_min: 1
-      m2_min: 40                           # m² totales (o cubiertos si no informa totales)
-      # m2_max: 90
-      # ubicacion_incluye: [Palermo Soho, Palermo Hollywood]  # alguna debe aparecer en la ubicación
-      # palabras_requeridas: [balcon, terraza]                # alguna debe aparecer en título/descripción
-      palabras_excluidas: [temporario, temporal, "apto profesional"]
+      precio_max: {USD: 400000}
+      dormitorios_min: 3
+      ubicacion_incluye: [Belgrano, Palermo, Recoleta, Barrio Norte, Las Cañitas]
+
+  # Zonaprop: la URL ya filtra barrios (Belgrano, Palermo, Recoleta), apto crédito, 3+ dormitorios,
+  # 1+ cochera, hasta USD 400.000 y publicados hace menos de 2 días (no se pierde nada a medianoche).
+  - nombre: Venta 3 dorm Zonaprop
+    urls:
+      - https://www.zonaprop.com.ar/departamentos-venta-belgrano-palermo-recoleta-con-apto-credito-mas-de-3-habitaciones-mas-de-1-garage-publicado-hace-menos-de-2-dias-menos-400000-dolar.html
+    filtros:
+      precio_max: {USD: 400000}
+      dormitorios_min: 3
+
+# Otros filtros disponibles: precio_min, aceptar_sin_precio, expensas_max, ambientes_min/max,
+# dormitorios_max, banos_min, m2_min/max, palabras_requeridas, palabras_excluidas.

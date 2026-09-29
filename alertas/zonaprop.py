@@ -59,6 +59,12 @@ def parsear_listado(html: str) -> list[Aviso]:
     return avisos
 
 
+def url_listado(url: str) -> str:
+    """La vista de mapa (...-map.html) no trae las tarjetas en el HTML: se pasa a vista de lista."""
+    partes = urlsplit(url)
+    return partes._replace(path=re.sub(r"-map\.html$", ".html", partes.path)).geturl()
+
+
 def url_pagina(url: str, pagina: int) -> str:
     """.../departamentos-alquiler-palermo.html -> ...-pagina-2.html"""
     if pagina <= 1:

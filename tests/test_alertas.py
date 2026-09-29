@@ -230,3 +230,20 @@ def test_detecta_desafio_antibot():
     # Un listado real que carga scripts de Cloudflare no es un desafío.
     assert not es_desafio(leer("zonaprop_listado.html") + '<script src="/cdn-cgi/challenge-platform/x.js"></script>')
     assert not es_desafio(leer("mercadolibre_listado.html"))
+
+
+def test_url_mapa_pasa_a_lista():
+    ml = (
+        "https://inmuebles.mercadolibre.com.ar/departamentos/venta/apto-credito/mas-de-3-dormitorios/"
+        "_DisplayType_M_PriceRange_0USD-400000USD_PublishedToday_YES_NoIndex_True_PARKING*LOTS_1-*"
+    )
+    assert mercadolibre.url_listado(ml) == ml.replace("_DisplayType_M", "")
+    assert mercadolibre.url_listado(ml.replace("_DisplayType_M", "")) == ml.replace("_DisplayType_M", "")
+    zp = "https://www.zonaprop.com.ar/departamentos-venta-belgrano-palermo-recoleta-menos-400000-dolar-map.html"
+    assert zonaprop.url_listado(zp) == zp.replace("-map.html", ".html")
+    assert zonaprop.url_pagina(zonaprop.url_listado(zp), 2).endswith("-400000-dolar-pagina-2.html")
+
+
+def test_config_del_repo_es_valida():
+    config = app.cargar_config(Path(__file__).parent.parent / "config.yaml")
+    assert config.busquedas and all(b.urls for b in config.busquedas)

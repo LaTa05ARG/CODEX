@@ -84,6 +84,7 @@ def _pausa() -> None:
 def obtener_avisos(url: str, paginas: int) -> list[Aviso]:
     avisos: list[Aviso] = []
     if sitio(url) == "zonaprop":
+        url = zonaprop.url_listado(url)
         for n in range(1, paginas + 1):
             if n > 1:
                 _pausa()
@@ -92,7 +93,7 @@ def obtener_avisos(url: str, paginas: int) -> list[Aviso]:
             if not pagina:
                 break
     else:
-        siguiente: str | None = url
+        siguiente: str | None = mercadolibre.url_listado(url)
         for n in range(paginas):
             if n > 0:
                 _pausa()
