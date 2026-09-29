@@ -78,7 +78,7 @@ def cuerpo_html(avisos: list[Aviso]) -> str:
     return f"<table style='border-collapse:collapse'>{''.join(filas)}</table>"
 
 
-def enviar(avisos: list[Aviso], busqueda: str) -> None:
+def _mandar(asunto_mail: str, texto: str, html_mail: str) -> None:
     usuario = os.environ.get("SMTP_USER")
     clave = os.environ.get("SMTP_PASSWORD")
     destino = os.environ.get("MAIL_TO")
@@ -88,11 +88,11 @@ def enviar(avisos: list[Aviso], busqueda: str) -> None:
     puerto = int(os.environ.get("SMTP_PORT") or 465)
 
     msg = EmailMessage()
-    msg["Subject"] = asunto(avisos, busqueda)
+    msg["Subject"] = asunto_mail
     msg["From"] = os.environ.get("MAIL_FROM") or usuario
     msg["To"] = destino
-    msg.set_content(cuerpo_texto(avisos))
-    msg.add_alternative(cuerpo_html(avisos), subtype="html")
+    msg.set_content(texto)
+    msg.add_alternative(html_mail, subtype="html")
 
     contexto = ssl.create_default_context()
     if puerto == 465:
@@ -104,3 +104,15 @@ def enviar(avisos: list[Aviso], busqueda: str) -> None:
             s.starttls(context=contexto)
             s.login(usuario, clave)
             s.send_message(msg)
+
+
+def enviar(avisos: list[Aviso], busqueda: str) -> None:
+    _mandar(asunto(avisos, busqueda), cuerpo_texto(avisos), cuerpo_html(avisos))
+
+
+def enviar_prueba() -> None:
+    texto = (
+        "Las alertas de departamentos están configuradas correctamente.\n"
+        "Desde ahora vas a recibir un mail por cada aviso nuevo que cumpla los filtros.\n"
+    )
+    _mandar("[Alertas de departamentos] Mail de prueba", texto, f"<p>{html.escape(texto)}</p>")

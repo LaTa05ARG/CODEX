@@ -264,3 +264,38 @@ def test_ubicacion_ignora_la_calle(ubicacion, direccion, pasa):
     f = {"ubicacion_incluye": ["Belgrano", "Palermo", "Recoleta"]}
     aviso = _aviso(ubicacion=ubicacion, direccion=direccion)
     assert (filtros.motivo_rechazo(aviso, f) is None) == pasa
+
+
+def test_mail_de_prueba(monkeypatch):
+    enviados = []
+
+    class SMTPFalso:
+        def __init__(self, *a, **k):
+            pass
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *a):
+            pass
+
+        def login(self, usuario, clave):
+            pass
+
+        def send_message(self, msg):
+            enviados.append(msg)
+
+    monkeypatch.setattr(notificar.smtplib, "SMTP_SSL", SMTPFalso)
+    monkeypatch.setenv("SMTP_USER", "remitente@example.com")
+    monkeypatch.setenv("SMTP_PASSWORD", "x")
+    monkeypatch.setenv("MAIL_TO", "a@example.com,b@example.com")
+    notificar.enviar_prueba()
+    assert enviados[0]["To"] == "a@example.com, b@example.com"
+    assert "prueba" in enviados[0]["Subject"].lower()
+
+
+def test_falta_config_de_mail(monkeypatch):
+    for var in ("SMTP_USER", "SMTP_PASSWORD", "MAIL_TO"):
+        monkeypatch.delenv(var, raising=False)
+    with pytest.raises(notificar.ConfigMailFaltante):
+        notificar.enviar_prueba()

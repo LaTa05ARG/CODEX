@@ -23,7 +23,8 @@ cumpla los filtros (precio, expensas, ambientes, m², zona, palabras clave).
    | `MAIL_FROM` | no | default `SMTP_USER` |
 
 4. **Editar `config.yaml`** con tus búsquedas y condiciones.
-5. Probar a mano: *Actions → Alertas de departamentos → Run workflow*.
+5. Probar a mano: *Actions → Alertas de departamentos → Run workflow*, tildando
+   "Mandar un mail de prueba" para confirmar que llegan los mails.
 
 La primera corrida de cada URL solo registra lo que ya está publicado (no manda
 mails); desde ahí avisa lo nuevo. Los avisos ya notificados se guardan en

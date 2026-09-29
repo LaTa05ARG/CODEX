@@ -5,6 +5,11 @@ on:
     # Cada 30 minutos (GitHub puede demorar las corridas programadas unos minutos).
     - cron: "*/30 * * * *"
   workflow_dispatch:
+    inputs:
+      probar_mail:
+        description: "Mandar un mail de prueba"
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -35,7 +40,8 @@ jobs:
           SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
           MAIL_FROM: ${{ secrets.MAIL_FROM }}
           MAIL_TO: ${{ secrets.MAIL_TO }}
-        run: python -m alertas
+          PROBAR_MAIL: ${{ inputs.probar_mail }}
+        run: python -m alertas $([ "$PROBAR_MAIL" = "true" ] && echo --probar-mail)
 
       # Se guarda aunque el paso anterior falle, para no re-notificar lo ya enviado.
       - name: Guardar avisos vistos

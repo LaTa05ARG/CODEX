@@ -194,6 +194,7 @@ def main(argv: list[str] | None = None) -> int:
         action="store_true",
         help="trata todos los avisos como nuevos (útil con --dry-run para probar los filtros)",
     )
+    p.add_argument("--probar-mail", action="store_true", help="manda un mail de prueba antes de revisar")
     p.add_argument("-v", "--verbose", action="store_true", help="muestra por qué se descarta cada aviso")
     args = p.parse_args(argv)
     logging.basicConfig(
@@ -204,7 +205,15 @@ def main(argv: list[str] | None = None) -> int:
 
     config = cargar_config(args.config)
     estado = Estado(args.estado)
-    codigo = correr(config, estado, dry_run=args.dry_run, ignorar_vistos=args.ignorar_vistos)
+    codigo = 0
+    if args.probar_mail:
+        try:
+            notificar.enviar_prueba()
+            log.info("Mail de prueba enviado")
+        except Exception as e:  # noqa: BLE001
+            log.error("No se pudo enviar el mail de prueba: %s", e)
+            codigo = 1
+    codigo = correr(config, estado, dry_run=args.dry_run, ignorar_vistos=args.ignorar_vistos) or codigo
     if not args.dry_run:
         estado.guardar()
     return codigo
