@@ -247,3 +247,20 @@ def test_url_mapa_pasa_a_lista():
 def test_config_del_repo_es_valida():
     config = app.cargar_config(Path(__file__).parent.parent / "config.yaml")
     assert config.busquedas and all(b.urls for b in config.busquedas)
+
+
+@pytest.mark.parametrize(
+    "ubicacion, direccion, pasa",
+    [
+        ("Av. Cabildo 2000, Belgrano R, Capital Federal", "", True),
+        ("Gurruchaga 1500, Palermo Soho, Capital Federal", "", True),
+        ("Av. Belgrano 1500, Monserrat, Capital Federal", "", False),  # la calle no cuenta como barrio
+        ("Av. Belgrano, Monserrat, Capital Federal", "", False),
+        ("Recoleta, Capital Federal", "", True),
+        ("Monserrat, Capital Federal", "Av. Belgrano al 1200", False),  # formato Zonaprop
+    ],
+)
+def test_ubicacion_ignora_la_calle(ubicacion, direccion, pasa):
+    f = {"ubicacion_incluye": ["Belgrano", "Palermo", "Recoleta"]}
+    aviso = _aviso(ubicacion=ubicacion, direccion=direccion)
+    assert (filtros.motivo_rechazo(aviso, f) is None) == pasa

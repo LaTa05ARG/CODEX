@@ -7,6 +7,8 @@ La excepción es el precio, controlada por `aceptar_sin_precio`.
 
 from __future__ import annotations
 
+import re
+
 from .modelo import Aviso, normalizar
 
 _NUMERICOS = {
@@ -42,6 +44,18 @@ def validar(filtros: dict, contexto: str) -> None:
             raise ValueError(f"{contexto}: '{clave}' debe ser una lista")
 
 
+def _barrio(aviso: Aviso) -> str:
+    """La ubicación sin la calle: 'Av. Belgrano 1500, Monserrat, Capital Federal' -> 'monserrat, capital federal'.
+
+    Evita que el nombre de una calle (Av. Belgrano, Av. Pueyrredón) cuente como barrio.
+    MercadoLibre pone la dirección como primera parte; Zonaprop la tiene aparte en `direccion`.
+    """
+    partes = [p.strip() for p in aviso.ubicacion.split(",") if p.strip()]
+    if len(partes) >= 3:
+        partes = partes[1:]
+    return normalizar(", ".join(p for p in partes if not re.search(r"\d", p)))
+
+
 def motivo_rechazo(aviso: Aviso, filtros: dict) -> str | None:
     """Devuelve None si el aviso cumple todas las condiciones, o el motivo por el que no."""
     precio_min = filtros.get("precio_min")
@@ -73,7 +87,8 @@ def motivo_rechazo(aviso: Aviso, filtros: dict) -> str | None:
     lugar = normalizar(f"{aviso.ubicacion} {aviso.direccion}")
 
     zonas = filtros.get("ubicacion_incluye")
-    if zonas and lugar.strip() and not any(normalizar(z) in lugar for z in zonas):
+    barrio = _barrio(aviso)
+    if zonas and barrio and not any(normalizar(z) in barrio for z in zonas):
         return f"ubicación '{aviso.ubicacion}' fuera de las zonas buscadas"
 
     requeridas = filtros.get("palabras_requeridas")
