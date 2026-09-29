@@ -1,0 +1,41 @@
+# Configuración de alertas de departamentos.
+#
+# Cada búsqueda combina:
+#   1. `urls`: búsquedas de MercadoLibre y/o Zonaprop. Lo más fácil es armar la
+#      búsqueda en la web con los filtros del sitio y pegar la URL acá.
+#      - Zonaprop: ordená por "Más recientes" (la URL termina en
+#        "-orden-publicado-descendente.html") para que lo nuevo quede arriba.
+#      - MercadoLibre: agregá el filtro "Publicados hoy" (`_PublishedToday_YES`
+#        en la URL), porque el sitio no ordena por fecha.
+#   2. `filtros`: condiciones extra que se revisan sobre cada aviso antes de
+#      mandar el mail. Todos son opcionales; borrá los que no uses.
+#
+# Si a un aviso le falta un dato (p. ej. no informa m²), ese filtro no lo
+# descarta. Los textos se comparan sin importar mayúsculas ni tildes.
+
+opciones:
+  paginas: 2                          # páginas de resultados a revisar por URL
+  un_mail_por_aviso: true             # false = un solo mail por búsqueda con todos los nuevos
+  notificar_en_primera_corrida: false # la 1ª vez solo registra lo que ya está publicado
+
+busquedas:
+  - nombre: Alquiler 2+ amb Palermo/Belgrano
+    urls:
+      - https://inmuebles.mercadolibre.com.ar/departamentos/alquiler/capital-federal/palermo/_PublishedToday_YES_NoIndex_True
+      - https://inmuebles.mercadolibre.com.ar/departamentos/alquiler/capital-federal/belgrano/_PublishedToday_YES_NoIndex_True
+      - https://www.zonaprop.com.ar/departamentos-alquiler-palermo-orden-publicado-descendente.html
+      - https://www.zonaprop.com.ar/departamentos-alquiler-belgrano-orden-publicado-descendente.html
+    filtros:
+      precio_max: {ARS: 900000, USD: 700}  # tope por moneda; avisos en otra moneda se descartan
+      # precio_min: {ARS: 300000}
+      # aceptar_sin_precio: false          # avisos con "Consultar precio"
+      expensas_max: 200000                 # en pesos
+      ambientes_min: 2
+      # ambientes_max: 3
+      # dormitorios_min: 1
+      # banos_min: 1
+      m2_min: 40                           # m² totales (o cubiertos si no informa totales)
+      # m2_max: 90
+      # ubicacion_incluye: [Palermo Soho, Palermo Hollywood]  # alguna debe aparecer en la ubicación
+      # palabras_requeridas: [balcon, terraza]                # alguna debe aparecer en título/descripción
+      palabras_excluidas: [temporario, temporal, "apto profesional"]
